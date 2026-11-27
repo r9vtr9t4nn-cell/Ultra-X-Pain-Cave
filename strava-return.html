@@ -1,21 +1,48 @@
 <!doctype html>
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Connecting Strava · The Long Game</title><style>body{margin:0;min-height:100vh;display:grid;place-items:center;background:#100d14;color:#fff;font:16px system-ui;text-align:center}.card{max-width:420px;padding:28px}p{color:#b9b2c2}</style></head>
-<body><main class="card"><h1>Finishing Strava connection…</h1><p id="status">Saving your secure connection and returning to The Long Game.</p></main>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Strava connection · The Long Game</title>
+<style>
+body{margin:0;min-height:100vh;display:grid;place-items:center;background:#100d14;color:#fff;font:16px system-ui;text-align:center}
+.card{max-width:460px;margin:20px;padding:30px;border:1px solid #62566b;border-radius:22px;background:#28232f}
+p{color:#c8bfce;line-height:1.5}
+button{border:0;border-radius:999px;padding:14px 24px;background:#ff2680;color:#250c19;font-weight:700;font-size:16px}
+#continue{display:none}
+</style>
+</head>
+<body>
+<main class="card">
+<h1 id="heading">Checking Strava connection…</h1>
+<p id="status">Checking that Strava returned a secure connection to this browser.</p>
+<button id="continue" type="button">Continue to The Long Game</button>
+</main>
 <script>
 (function(){
  const params=new URLSearchParams((location.hash||"").replace(/^#/,""));
  const session=params.get("strava_session");
+ const heading=document.getElementById("heading");
  const status=document.getElementById("status");
+ const button=document.getElementById("continue");
  if(!session){
-  status.textContent="No connection token was returned. Please return to The Long Game and try Connect Strava again.";
+  heading.textContent="No Strava session received";
+  status.textContent="The connector returned to this page, but no session token was included. Please take a screenshot of this message.";
   return;
  }
  try{
   localStorage.setItem("longgame-strava-session",session);
-  status.textContent="Connection saved. Returning to The Long Game…";
-  location.replace("./?strava_connected=1");
+  const saved=localStorage.getItem("longgame-strava-session");
+  if(saved!==session) throw new Error("Storage verification failed");
+  heading.textContent="Strava session received and saved";
+  status.textContent="The secure session is saved in this browser. Select Continue to return to The Long Game.";
+  button.style.display="inline-block";
+  button.addEventListener("click",()=>location.replace("./"));
  }catch(error){
-  status.textContent="Could not save the connection in this browser. Please open The Long Game in Safari.";
+  heading.textContent="Could not save Strava session";
+  status.textContent="This browser did not allow the connection to be saved. Open The Long Game in a normal Safari window and try again.";
  }
 })();
-</script></body></html>
+</script>
+</body>
+</html>
