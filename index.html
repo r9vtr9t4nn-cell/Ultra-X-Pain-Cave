@@ -125,6 +125,7 @@ function handleStravaReturn(){
  }
 }
 window.addEventListener('hashchange',handleStravaReturn);
+handleStravaReturn();
 function renderStrava(){
  const connected=!!stravaSession;
  document.getElementById('stravaStatus').textContent=connected?'Strava is connected. Your activities can be imported whenever you sync.':'Connect Strava to import your completed runs and trail runs.';
