@@ -125,8 +125,24 @@ function handleStravaReturn(){
  }
 }
 window.addEventListener('hashchange',handleStravaReturn);
+window.addEventListener('storage',event=>{
+ if(event.key===STRAVA_SESSION_KEY){
+  stravaSession=event.newValue||'';
+  renderStrava();
+ }
+});
+window.addEventListener('focus',()=>{
+ stravaSession=localStorage.getItem(STRAVA_SESSION_KEY)||'';
+ renderStrava();
+});
+document.addEventListener('visibilitychange',()=>{
+ if(!document.hidden){
+  stravaSession=localStorage.getItem(STRAVA_SESSION_KEY)||'';
+  renderStrava();
+ }
+});
 window.addEventListener('pageshow',()=>{
- stravaSession=localStorage.getItem(STRAVA_SESSION_KEY)||stravaSession;
+ stravaSession=localStorage.getItem(STRAVA_SESSION_KEY)||'';
  handleStravaReturn();
  renderStrava();
 });
