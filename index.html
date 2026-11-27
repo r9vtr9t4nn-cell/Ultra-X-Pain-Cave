@@ -167,6 +167,18 @@ function renderFuel(){let f=data.fuel[dateISO(new Date())]||{};let items=['Eat r
 function renderShopping(){document.getElementById('shopList').innerHTML=data.shopping.length?data.shopping.map((s,i)=>`<div class="task"><input type="checkbox" data-shop="${i}" ${s.done?'checked':''}><label>${esc(s.name)}</label><button class="btn" data-delshop="${i}">×</button></div>`).join(''):'<div class="empty">Your shopping list is empty.</div>'}
 function showLog(){document.getElementById('logForm').style.display='block';document.getElementById('aDate').value=dateISO(new Date());document.getElementById('logForm').scrollIntoView({behavior:'smooth',block:'start'})}
 document.querySelectorAll('[data-go]').forEach(b=>b.addEventListener('click',()=>{let id=b.dataset.go;document.getElementById(id).scrollIntoView({behavior:'smooth'});document.querySelectorAll('.nav button').forEach(x=>x.classList.toggle('active',x.dataset.go===id))}));
+/* iOS/Safari navigation fallback: delegate taps and use native hash navigation. */
+document.addEventListener('click',function(ev){
+ const button=ev.target.closest('.nav button[data-go]');
+ if(!button)return;
+ const id=button.getAttribute('data-go'),target=document.getElementById(id);
+ if(!target)return;
+ ev.preventDefault();
+ document.querySelectorAll('.nav button').forEach(x=>x.classList.toggle('active',x===button));
+ if(location.hash!=='#'+id)history.replaceState(null,'','#'+id);
+ target.scrollIntoView({behavior:'auto',block:'start'});
+},true);
+
 function coachSnapshot(){let p=data.profile||{},recent=[...data.activities].sort((a,b)=>(b.date||'').localeCompare(a.date||'')).slice(0,10),gym=[...(data.gym||[])].sort((a,b)=>(b.date||'').localeCompare(a.date||'')).slice(0,5),checks=[...(data.checks||[])].slice(-5);return [
 'You are my evidence-informed ultra-running coach. Help me prepare for Ultra X Scotland 110K on 1 May 2027, approximately 3,500m ascent, target 12–14 hours.',
 'Athlete: age 33; Inverness, Scotland; body mass 72.6 kg. Current running baseline around 30–40 km/week; longest comfortable run 20–25 km. Symptom-free at last assessment. Current 5K 21:07 (HR 184).',
