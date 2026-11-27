@@ -44,7 +44,7 @@ html,body{min-height:100%;width:100%;overflow-x:hidden}
 <body><div class="shell">
 <header class="top"><div class="brand">The Long Game</div><div class="status">Personal endurance project <span id="saveState">· On this device</span></div></header>
 <section class="hero"><div class="eyebrow">Built for the miles ahead</div><h1>THE LONG<br>GAME.</h1><p>A considered approach to getting stronger, going further and arriving ready. One week at a time.</p><div class="race-line"><div class="metric"><strong>110 km</strong><span>Goal distance</span></div><div class="metric"><strong>01 May 2027</strong><span>Race day · Ultra X Scotland</span></div><div class="metric"><strong id="daysLeft">—</strong><span>Days to go</span></div></div></section>
-<nav class="nav" aria-label="Main navigation"><a class="active" href="#today" data-go="today">⌂<span>Home</span></a><a href="#plan" data-go="plan">▦<span>Plan</span></a><a href="#training" data-go="training">＋<span>Runs</span></a><a href="#gym" data-go="gym">▤<span>Gym</span></a><a href="#weather" data-go="weather">☁<span>Weather</span></a><a href="#guides" data-go="guides">♡<span>Guides</span></a><a href="#coach" data-go="coach">✦<span>Coach</span></a></nav>
+<nav class="nav" aria-label="Main navigation"><a class="active" href="#today" data-go="today">⌂<span>Home</span></a><a href="#plan" data-go="plan">▦<span>Plan</span></a><a href="#training" data-go="training">＋<span>Runs</span></a><a href="#gym" data-go="gym">▤<span>Gym</span></a><a href="#weather" data-go="weather">☁<span>Weather</span></a><a href="#guides" data-go="guides">♡<span>Guides</span></a><a href="#coach" data-go="coach">✦<span>Coach</span></a><a href="#predictor" data-go="predictor">◷<span>Predict</span></a></nav>
 <section class="section" id="today"><div class="section-head"><div><div class="eyebrow">Your dashboard</div><h2>Today, not someday.</h2><div class="section-sub" id="todayDate"></div></div><span class="pill good">The long game</span></div>
 <div class="card" id="dailyCalendar" style="margin-bottom:12px">
 <div class="card-label">Training calendar</div>
@@ -75,6 +75,12 @@ html,body{min-height:100%;width:100%;overflow-x:hidden}
 <div class="card"><div class="card-label">What would you like help with?</div><textarea id="coachQuestion" rows="4" placeholder="e.g. My legs are heavy after Sunday's long run. Should I change Wednesday's session?"></textarea><div class="btnrow" style="margin-top:12px"><button class="btn primary" id="openCoach">✦ Open coach in ChatGPT</button><button class="btn" id="copyCoach">Copy training snapshot</button></div><div class="note">This opens ChatGPT separately with your question and a snapshot of your athlete profile, plan and recent logs. Discuss changes there, then bring the agreed changes back here or ask me in this chat to update the app.</div></div>
 <div class="card" style="margin-top:12px"><div class="card-label">Quick starts</div><div class="btnrow"><button class="btn" data-coach-prompt="Review my last 7 days of training and tell me whether I should adjust the next 7 days.">Review my week</button><button class="btn" data-coach-prompt="Help me adjust my next scheduled session based on how I am feeling and my recent training. Ask me any questions you need first.">Adjust next session</button><button class="btn" data-coach-prompt="Review my recovery, fatigue and training load. Tell me what warning signs to watch for and whether I should rest.">Recovery check</button><button class="btn" data-coach-prompt="Help me adapt my Ultra X Scotland 110K training plan while protecting consistency and avoiding sudden load increases.">Tweak my plan</button></div></div>
 <div class="card" style="margin-top:12px"><div class="card-label">How this works</div><p class="small">No extra AI subscription, API key or third-party fitness account is needed. Your question and selected training data are passed to ChatGPT when you tap the button. Your run and gym logs remain stored locally in this app.</p><p class="small">The coach should treat pain, illness and unusual fatigue cautiously. It cannot diagnose injuries or replace a qualified clinician.</p></div></section>
+<section class="section" id="predictor"><div class="section-head"><div><div class="eyebrow">110K outlook</div><h2>Race predictor.</h2><div class="section-sub">A live estimate built only from runs you've actually completed.</div></div><span class="pill">Updates with each run</span></div>
+<div class="card"><div class="card-label">Estimated Ultra X Scotland finish</div><div id="predictionMain" class="big">Building your estimate…</div><div class="small" id="predictionBand"></div>
+<div style="margin:22px 0 8px"><div style="display:flex;justify-content:space-between;gap:8px;font-size:11px;color:var(--muted)"><span>10 hours</span><span>12 hours</span><span>14 hours</span><span>16 hours</span><span>18 hours</span></div><div id="predictionScale" style="position:relative;height:14px;border-radius:99px;background:linear-gradient(90deg,#61d69b,#c7df9b,#ffb36b,#ff7187);margin-top:8px"><i id="predictionMarker" style="position:absolute;top:-5px;left:50%;width:4px;height:24px;border-radius:4px;background:white;box-shadow:0 0 0 2px #111"></i></div></div>
+<div class="grid" style="margin-top:18px"><div class="card span-6"><div class="card-label">Recent weekly average</div><div class="big" id="predictionWeekly">—</div><div class="small">Last 6 weeks, completed runs only</div></div><div class="card span-6"><div class="card-label">Longest recent run</div><div class="big" id="predictionLong">—</div><div class="small">Last 12 weeks</div></div><div class="card span-6"><div class="card-label">Recent ascent</div><div class="big" id="predictionClimb">—</div><div class="small">Last 6 weeks, recorded elevation</div></div><div class="card span-6"><div class="card-label">Runs analysed</div><div class="big" id="predictionCount">—</div><div class="small">Last 6 weeks</div></div></div>
+<div class="note" id="predictionConfidence">As you log more runs, this estimate will update automatically.</div>
+<p class="small" style="margin:12px 0 0">This is an experimental training-based estimate, not a validated ultra-race predictor or a promise of finishing time. It uses your recorded run pace, recent volume, longest run and elevation. Missing duration or elevation data reduces confidence. It does not count planned sessions, gym work or uncompleted runs.</p></div></section>
 <footer class="footer">THE LONG GAME · A work in progress, built around the athlete — not the other way around.<br><span id="offlineState">App ready</span> · Your entries stay on this device.</footer>
 </div><div class="toast" id="toast" role="status" aria-live="polite"></div>
 <script>
@@ -91,7 +97,46 @@ function weekStart(d){let x=new Date(d);x.setHours(12,0,0,0);x.setDate(x.getDate
 function render(){renderDayCalendar();let now=new Date(),race=parseDate(RACE),days=Math.ceil((race-now.setHours(0,0,0,0))/86400000);document.getElementById('daysLeft').textContent=days;document.getElementById('daysCard').textContent=days;document.getElementById('todayDate').textContent=new Date().toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
 let ws=weekStart(new Date()),we=new Date(ws);we.setDate(we.getDate()+7);let acts=data.activities.filter(a=>a.date>=dateISO(ws)&&a.date<dateISO(we));document.getElementById('weekKm').textContent=acts.filter(a=>/run/i.test(a.type)).reduce((s,a)=>s+(+a.distance||0),0).toFixed(1)+' km';document.getElementById('weekSessions').textContent=acts.length;document.getElementById('checkStatus').textContent=data.checks.length? 'Logged':'Due';
 let runs=data.activities.filter(a=>/run/i.test(a.type));document.getElementById('totalKm').textContent=runs.reduce((s,a)=>s+(+a.distance||0),0).toFixed(1)+' km';document.getElementById('totalRuns').textContent=runs.length;document.getElementById('longest').textContent=runs.length?Math.max(...runs.map(a=>+a.distance||0)).toFixed(1)+' km':'—';
-renderWeek();renderActivities();renderChecks();renderFuel();renderShopping();renderGym()}
+renderWeek();renderActivities();renderChecks();renderFuel();renderShopping();renderGym();renderPredictor()}
+function renderPredictor(){
+ const now=new Date(),cut=new Date(now);cut.setDate(cut.getDate()-42);
+ const recent=data.activities.filter(a=>/run/i.test(a.type||'')&&a.date&&parseDate(a.date)>=cut&&parseDate(a.date)<=now);
+ const twelve=new Date(now);twelve.setDate(twelve.getDate()-84);
+ const longer=data.activities.filter(a=>/run/i.test(a.type||'')&&a.date&&parseDate(a.date)>=twelve&&parseDate(a.date)<=now);
+ const km=a=>Math.max(0,Number(a.distance)||0);
+ const weekly=recent.reduce((v,a)=>v+km(a),0)/6;
+ const longest=longer.reduce((v,a)=>Math.max(v,km(a)),0);
+ const climb=recent.reduce((v,a)=>v+(Number(a.elevation)||0),0);
+ const paces=recent.filter(a=>km(a)>=8).map(a=>{
+   let p=String(a.pace||'').trim(),m=p.match(/^(\d+):([0-5]?\d)(?::([0-5]?\d))?$/);
+   if(m)return Number(m[1])+Number(m[2])/60+(m[3]?Number(m[3])/3600:0);
+   let d=Number(a.duration),dist=km(a);return d>0&&dist>0?d/dist:null;
+ }).filter(v=>v&&v>=3.5&&v<=15).sort((a,b)=>a-b);
+ const el=id=>document.getElementById(id);
+ el('predictionWeekly').textContent=weekly.toFixed(1)+' km';
+ el('predictionLong').textContent=longest?longest.toFixed(1)+' km':'—';
+ el('predictionClimb').textContent=climb.toLocaleString('en-GB',{maximumFractionDigits:0})+' m';
+ el('predictionCount').textContent=recent.length;
+ if(recent.length<3||paces.length<1||longest<10){
+   el('predictionMain').textContent='Not enough recent data yet';
+   el('predictionBand').textContent='Log at least 3 runs, including one of 10 km or more with a recorded pace or duration.';
+   el('predictionMarker').style.display='none';
+   el('predictionConfidence').textContent='The predictor will start once there is enough recent running data. Older imported activities outside the last 6–12 weeks are not used for the current estimate.';
+   return;
+ }
+ const pace=paces[Math.floor((paces.length-1)/2)];
+ // Conservative heuristic: recent longer-run pace, an ultra-fatigue allowance, and a modest fixed climbing allowance.
+ const central=pace*110*1.38+35;
+ const spread=Math.max(1.25,central*.13);
+ const low=central-spread,high=central+spread;
+ const fmt=x=>{let h=Math.floor(x/60),m=Math.round(x-h*60);if(m===60){h++;m=0}return h+'h '+String(m).padStart(2,'0')+'m'};
+ el('predictionMain').textContent=fmt(central);
+ el('predictionBand').textContent='Indicative range: '+fmt(low)+' – '+fmt(high);
+ const clamped=Math.max(10,Math.min(18,central/60)),pct=((clamped-10)/8)*100;
+ el('predictionMarker').style.display='block';el('predictionMarker').style.left=pct+'%';
+ let confidence=recent.length>=12&&longest>=25?'Moderate':recent.length>=6?'Low–moderate':'Low';
+ el('predictionConfidence').textContent=confidence+' confidence. Based on '+recent.length+' runs in 6 weeks and '+longest.toFixed(1)+' km longest run in 12 weeks. The model is deliberately broad and will move as your completed training changes; it cannot yet account properly for course conditions, stops, technical terrain, weather or race-day execution.';
+}
 const PROGRAM_START='2026-11-30';
 let selectedCalendarDate=dateISO(new Date());
 let calendarMonth=new Date(new Date().getFullYear(),new Date().getMonth(),1,12);
