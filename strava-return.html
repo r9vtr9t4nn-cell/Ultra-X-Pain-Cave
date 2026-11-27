@@ -6,10 +6,14 @@
  const params=new URLSearchParams((location.hash||"").replace(/^#/,""));
  const session=params.get("strava_session");
  const status=document.getElementById("status");
- if(!session){status.textContent="No connection token was returned. Please return to The Long Game and try Connect Strava again.";return;}
+ if(!session){
+  status.textContent="No connection token was returned. Please return to The Long Game and try Connect Strava again.";
+  return;
+ }
  try{
   localStorage.setItem("longgame-strava-session",session);
-  location.replace("./#strava_session="+encodeURIComponent(session)+"&strava_connected=1");
+  status.textContent="Connection saved. Returning to The Long Game…";
+  location.replace("./?strava_connected=1");
  }catch(error){
   status.textContent="Could not save the connection in this browser. Please open The Long Game in Safari.";
  }
