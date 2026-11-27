@@ -243,9 +243,10 @@ function coachSnapshot(){let p=data.profile||{},recent=[...data.activities].sort
 'Recent recovery check-ins: '+JSON.stringify(checks),
 'My question: '+(document.getElementById('coachQuestion').value.trim()||'Please review my current training and ask what you need to know before advising.')
 ].join('\\n\\n')}
-document.getElementById('openCoach').onclick=()=>{let prompt=coachSnapshot();if(prompt.length>5800){prompt=prompt.slice(0,5700)+'\\n\\n[Some older log detail omitted to fit the prompt.]'}window.open('https://chatgpt.com/?q='+encodeURIComponent(prompt),'_blank','noopener');};
+function openCoachWithQuestion(question){let box=document.getElementById('coachQuestion');if(question!==undefined)box.value=question;let prompt=coachSnapshot();if(prompt.length>5800){prompt=prompt.slice(0,5700)+'\\n\\n[Some older log detail omitted to fit the prompt.]'}let opened=window.open('https://chatgpt.com/?q='+encodeURIComponent(prompt),'_blank','noopener');if(!opened)toast('Allow pop-ups for this app to open your coach');}
+document.getElementById('openCoach').onclick=()=>openCoachWithQuestion();
 document.getElementById('copyCoach').onclick=async()=>{try{await navigator.clipboard.writeText(coachSnapshot());toast('Training snapshot copied')}catch(e){document.getElementById('coachQuestion').value=coachSnapshot();toast('Snapshot placed in the question box — select and copy')}};
-document.querySelectorAll('[data-coach-prompt]').forEach(b=>b.onclick=()=>{document.getElementById('coachQuestion').value=b.dataset.coachPrompt;document.getElementById('coachQuestion').focus()});
+document.querySelectorAll('[data-coach-prompt]').forEach(b=>b.addEventListener('click',()=>openCoachWithQuestion(b.dataset.coachPrompt)));
 document.getElementById('showLog').onclick=showLog;
 document.getElementById('cancelLog').onclick=()=>document.getElementById('logForm').style.display='none';
 document.getElementById('activityForm').onsubmit=e=>{e.preventDefault();let pace=document.getElementById('aPace').value;if(!pace&&+aDistance.value>0&&+aDuration.value>0){let mins=+aDuration.value/+aDistance.value;pace=Math.floor(mins)+':'+String(Math.round((mins%1)*60)).padStart(2,'0')}data.activities.push({id:crypto.randomUUID(),date:aDate.value,type:aType.value,distance:aDistance.value,duration:aDuration.value,hr:aHr.value,elevation:aElev.value,pace:pace,rpe:aRpe.value,notes:aNotes.value});save();render();e.target.reset();document.getElementById('logForm').style.display='none';toast('Session saved')};
