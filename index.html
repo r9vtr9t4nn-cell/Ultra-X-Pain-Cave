@@ -309,7 +309,22 @@ document.getElementById('calendarDays').addEventListener('click',e=>{let b=e.tar
 document.getElementById('calendarPrev').onclick=()=>{calendarMonth.setMonth(calendarMonth.getMonth()-1);selectedCalendarDate=dateISO(new Date(calendarMonth.getFullYear(),calendarMonth.getMonth(),1,12));renderDayCalendar()};
 document.getElementById('calendarNext').onclick=()=>{calendarMonth.setMonth(calendarMonth.getMonth()+1);selectedCalendarDate=dateISO(new Date(calendarMonth.getFullYear(),calendarMonth.getMonth(),1,12));renderDayCalendar()};
 
-function renderWeek(){let start=weekStart(new Date());start.setDate(start.getDate()+weekOffset*7);let end=new Date(start);end.setDate(end.getDate()+6);document.getElementById('weekTitle').textContent=start.toLocaleDateString('en-GB',{day:'numeric',month:'short'})+' — '+end.toLocaleDateString('en-GB',{day:'numeric',month:'short'});let html='';for(let i=0;i<7;i++){let d=new Date(start);d.setDate(d.getDate()+i);let iso=dateISO(d),items=data.plans.filter(p=>p.date===iso);html+=`<div class="day ${iso===dateISO(new Date())?'today':''}"><div class="dow">${d.toLocaleDateString('en-GB',{weekday:'short'})}</div><div class="date">${d.getDate()}</div><div class="kind">${items.length?items.map(p=>esc(p.title)).join('<br>'):'—'}</div></div>`}document.getElementById('weekGrid').innerHTML=html;let future=data.plans.filter(p=>p.date>=dateISO(new Date())).sort((a,b)=>a.date.localeCompare(b.date));document.getElementById('planList').innerHTML='<div class="card-label">Upcoming planned sessions</div>'+(future.length?future.map(p=>`<div class="logitem"><div><strong>${esc(p.title)}</strong><div class="small">${esc(p.date)} · ${esc(p.kind||'Session')} ${p.notes?'· '+esc(p.notes):''}</div></div><button class="btn" data-delplan="${p.id}">Remove</button></div>`).join(''):'<div class="empty">No sessions planned yet.</div>')}
+function structuredWeekSessions(monday){
+ const anchor=new Date('2026-11-30T12:00:00');const diff=Math.round((monday-anchor)/604800000);if(diff<0||diff>=22)return [];
+ const detail=document.querySelectorAll('#plan details')[diff];if(!detail)return [];const body=detail.querySelector('div');if(!body)return [];
+ const out=[];const re=/<b>(Mon|Tue|Wed|Thu|Fri|Sat|Sun)[^<]*<\/b>\s*([^<]*(?:<br>|$))/g;let m;
+ while((m=re.exec(body.innerHTML))){const day=m[1],line=m[2].replace(/<br>$/,'').trim();if(day==='Sat'||/rest/i.test(line))continue;const title=line.split(':').slice(1).join(':').trim();if(!title)continue;const date=new Date(monday);date.setDate(date.getDate()+({Mon:0,Tue:1,Wed:2,Thu:3,Fri:4,Sat:5,Sun:6}[day]));const gym=day==='Mon'||day==='Thu';out.push({date:dateISO(date),title:(gym?'Gym · ':'')+title,kind:gym?'Gym':'Run'});}
+ return out;
+}
+function renderWeek(){
+ let start=weekStart(new Date());const anchor=new Date('2026-11-30T12:00:00');if(start<anchor)start=anchor;start.setDate(start.getDate()+weekOffset*7);
+ let end=new Date(start);end.setDate(end.getDate()+6);document.getElementById('weekTitle').textContent=start.toLocaleDateString('en-GB',{day:'numeric',month:'short'})+' — '+end.toLocaleDateString('en-GB',{day:'numeric',month:'short'});
+ const all=structuredWeekSessions(start).concat(data.plans.filter(p=>p.date>=dateISO(start)&&p.date<=dateISO(end)));let html='';
+ for(let i=0;i<7;i++){let d=new Date(start);d.setDate(d.getDate()+i);let iso=dateISO(d),items=all.filter(p=>p.date===iso);html+='<div class="day '+(iso===dateISO(new Date())?'today':'')+'"><div class="dow">'+d.toLocaleDateString('en-GB',{weekday:'short'})+'</div><div class="date">'+d.getDate()+'</div><div class="kind">'+(items.length?items.map(p=>'<span class="planned-item">'+esc(p.title)+'</span>').join(''):'—')+'</div></div>';}
+ document.getElementById('weekGrid').innerHTML=html;
+ const next=new Date(start);next.setDate(next.getDate()+7);const upcoming=structuredWeekSessions(start).concat(structuredWeekSessions(next),data.plans.filter(p=>p.date>=dateISO(new Date()))).filter((p,i,arr)=>arr.findIndex(x=>x.date===p.date&&x.title===p.title)===i).sort((x,y)=>x.date.localeCompare(y.date)).filter(p=>p.date>=dateISO(new Date())).slice(0,12);
+ document.getElementById('planList').innerHTML='<div class="card-label">Upcoming planned sessions</div>'+(upcoming.length?upcoming.map(p=>'<div class="logitem"><div><strong>'+esc(p.title)+'</strong><div class="small">'+esc(p.date)+' · '+esc(p.kind||'Session')+'</div></div></div>').join(''):'<div class="empty">No upcoming sessions planned.</div>');
+}
 function renderActivities(){
  const list=[...data.activities].sort((a,b)=>b.date.localeCompare(a.date)).slice(0,5);
  const metric=(label,value,unit='')=>value!==''&&value!==null&&value!==undefined&&Number(value)!==0?'<div class="activity-stat"><span>'+label+'</span><strong>'+esc(value)+unit+'</strong></div>':'';
