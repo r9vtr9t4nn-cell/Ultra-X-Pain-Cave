@@ -228,7 +228,8 @@ function plannedForDay(iso){
  const prefix='W'+String(w).padStart(2,'0')+' ·';
  const wd=details.find(x=>(x.querySelector('summary')?.innerText||'').includes(prefix));
  if(!wd)return {title:'Session not found',kind:'Training',distance:'—',pace:'—',hr:'—',rpe:'—',elevation:'—',detail:'No session details were found for this date in the current plan.'};
- const workoutBlock=Array.from(wd.children).find(el=>el.tagName==='DIV'&&el.classList.contains('small'));\n const lines=(workoutBlock?.innerText||wd.innerText).split(/\n/).map(x=>x.trim());
+ const workoutBlock=Array.from(wd.children).find(el=>el.tagName==='DIV'&&el.classList.contains('small'));
+ const lines=(workoutBlock?.innerText||wd.innerText).split(/\n/).map(x=>x.trim());
  const line=lines.find(x=>x.startsWith(label+' ·'));
  if(!line)return {title:'Recovery / easy day',kind:'Recovery',distance:'—',pace:'—',hr:'—',rpe:'2–3 / 10',elevation:'—',detail:'No separate run is prescribed for this day. Keep recovery the priority.'};
  const m=line.match(/^(Tue|Wed|Fri|Sun) · ([^:]+):\s*(.*)$/);
