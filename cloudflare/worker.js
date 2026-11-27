@@ -36,15 +36,24 @@ function mapActivity(a) {
     distance:Number(a.distance ?? a.distanceInMeters ?? 0),
     duration:Number(a.duration ?? a.movingDuration ?? 0),
     elevation:Number(a.elevationGain ?? a.totalElevationGain ?? a.elevation_gain ?? 0),
-    averageHr:Number(a.averageHR ?? a.averageHeartRate ?? a.avgHR ?? 0)
+    averageHr:Number(a.averageHR ?? a.averageHeartRate ?? a.avgHR ?? 0),
+    maxHr:Number(a.maxHR ?? a.maxHeartRate ?? 0),
+    averageSpeed:Number(a.averageSpeed ?? a.avgSpeed ?? 0),
+    averageCadence:Number(a.averageRunningCadenceInStepsPerMinute ?? a.averageRunningCadence ?? a.avgRunningCadence ?? a.averageBikeCadence ?? 0),
+    maxCadence:Number(a.maxRunningCadenceInStepsPerMinute ?? a.maxRunningCadence ?? a.maxBikeCadence ?? 0),
+    calories:Number(a.calories ?? a.activeCalories ?? 0)
   };
 }
 async function ensureTables(db) {
   await db.prepare(`CREATE TABLE IF NOT EXISTS garmin_activities (
     activity_id TEXT PRIMARY KEY, activity_name TEXT, activity_type TEXT, start_date TEXT,
     distance REAL, duration REAL, elevation_gain REAL, average_hr REAL,
-    imported_at TEXT DEFAULT CURRENT_TIMESTAMP
+    imported_at TEXT DEFAULT CURRENT_TIMESTAMP,
+    max_hr REAL, average_speed REAL, average_cadence REAL, max_cadence REAL, calories REAL
   )`).run();
+  for (const column of ["max_hr REAL","average_speed REAL","average_cadence REAL","max_cadence REAL","calories REAL"]) {
+    try { await db.prepare("ALTER TABLE garmin_activities ADD COLUMN "+column).run(); } catch (_) {}
+  }
   await db.prepare(`CREATE TABLE IF NOT EXISTS garmin_sync_state (
     id INTEGER PRIMARY KEY CHECK(id=1), last_sync_at TEXT, activity_count INTEGER
   )`).run();
@@ -74,9 +83,9 @@ async function syncGarmin(env) {
     for(const item of list) {
       const a=mapActivity(item); if(!a.id) continue;
       statements.push(env.DB.prepare(`INSERT OR REPLACE INTO garmin_activities
-        (activity_id,activity_name,activity_type,start_date,distance,duration,elevation_gain,average_hr,imported_at)
-        VALUES (?,?,?,?,?,?,?,?,CURRENT_TIMESTAMP)`)
-        .bind(a.id,a.name,a.type,a.date,a.distance,a.duration,a.elevation,a.averageHr||null));
+        (activity_id,activity_name,activity_type,start_date,distance,duration,elevation_gain,average_hr,max_hr,average_speed,average_cadence,max_cadence,calories,imported_at)
+        VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,CURRENT_TIMESTAMP)`)
+        .bind(a.id,a.name,a.type,a.date,a.distance,a.duration,a.elevation,a.averageHr||null,a.maxHr||null,a.averageSpeed||null,a.averageCadence||null,a.maxCadence||null,a.calories||null));
     }
     if(statements.length) { for(let i=0;i<statements.length;i+=100) await env.DB.batch(statements.slice(i,i+100)); total+=statements.length; }
     start+=list.length; pages++;
@@ -112,7 +121,7 @@ export default {
         return response({ok:true,...result});
       }
       if(url.pathname==="/api/activities" && request.method==="GET") {
-        const rows=await env.DB.prepare(`SELECT activity_id,activity_name,activity_type,start_date,distance,duration,elevation_gain,average_hr
+        const rows=await env.DB.prepare(`SELECT activity_id,activity_name,activity_type,start_date,distance,duration,elevation_gain,average_hr,max_hr,average_speed,average_cadence,max_cadence,calories
           FROM garmin_activities ORDER BY start_date DESC LIMIT 2000`).all();
         const state=await env.DB.prepare("SELECT last_sync_at,activity_count FROM garmin_sync_state WHERE id=1").first();
         return response({activities:rows.results||[],sync:state||null});
