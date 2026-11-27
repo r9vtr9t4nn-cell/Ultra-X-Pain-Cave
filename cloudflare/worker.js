@@ -78,7 +78,7 @@ async function syncGarmin(env) {
         VALUES (?,?,?,?,?,?,?,?,CURRENT_TIMESTAMP)`)
         .bind(a.id,a.name,a.type,a.date,a.distance,a.duration,a.elevation,a.averageHr||null));
     }
-    if(statements.length) { await env.DB.batch(statements); total+=statements.length; }
+    if(statements.length) { for(let i=0;i<statements.length;i+=100) await env.DB.batch(statements.slice(i,i+100)); total+=statements.length; }
     start+=list.length; pages++;
     if(list.length<1000) break;
   }
