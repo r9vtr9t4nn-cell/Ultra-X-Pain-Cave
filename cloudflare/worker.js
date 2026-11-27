@@ -157,7 +157,7 @@ export default {
           ON CONFLICT(athlete_id) DO UPDATE SET token_cipher=excluded.token_cipher,expires_at=excluded.expires_at,updated_at=CURRENT_TIMESTAMP`)
           .bind(athleteId,await encrypt(tokens,env.TOKEN_ENCRYPTION_KEY),tokens.expires_at).run();
         const session = await signSession(athleteId,env.TOKEN_ENCRYPTION_KEY);
-        return Response.redirect(APP_ORIGIN+"/Ultra-X-Pain-Cave/#strava_session="+encodeURIComponent(session)+"&strava_connected=1",302);
+        return Response.redirect(APP_ORIGIN+"/Ultra-X-Pain-Cave/strava-return.html#strava_session="+encodeURIComponent(session),302);
       }
       if (url.pathname.startsWith("/api/")) {
         if (origin && origin !== APP_ORIGIN) return json({error:"Origin not allowed"},403);
