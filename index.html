@@ -125,8 +125,14 @@ function handleStravaReturn(){
  }
 }
 window.addEventListener('hashchange',handleStravaReturn);
+window.addEventListener('pageshow',()=>{
+ stravaSession=localStorage.getItem(STRAVA_SESSION_KEY)||stravaSession;
+ handleStravaReturn();
+ renderStrava();
+});
 handleStravaReturn();
 function renderStrava(){
+ stravaSession=localStorage.getItem(STRAVA_SESSION_KEY)||stravaSession;
  const connected=!!stravaSession;
  document.getElementById('stravaStatus').textContent=connected?'Strava is connected. Your activities can be imported whenever you sync.':'Connect Strava to import your completed runs and trail runs.';
  document.getElementById('stravaConnect').style.display=connected?'none':'inline-flex';
