@@ -199,6 +199,10 @@ async function syncStrava(){
 document.getElementById('stravaSync').onclick=syncStrava;
 document.getElementById('stravaDisconnect').onclick=()=>{if(!confirm('Disconnect Strava on this device? Imported activities will remain in your training history.'))return;stravaSession='';localStorage.removeItem(STRAVA_SESSION_KEY);renderStrava();document.getElementById('stravaLastSync').textContent='Strava disconnected. Imported activities remain saved.';toast('Strava disconnected')};
 handleStravaReturn();renderStrava();
+if(sessionStorage.getItem('longgame-strava-pending-sync')==='1'){
+ sessionStorage.removeItem('longgame-strava-pending-sync');
+ setTimeout(()=>syncStrava(),500);
+}
 function render(){renderDayCalendar();let now=new Date(),race=parseDate(RACE),days=Math.ceil((race-now.setHours(0,0,0,0))/86400000);document.getElementById('daysLeft').textContent=days;document.getElementById('daysCard').textContent=days;document.getElementById('todayDate').textContent=new Date().toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
 let ws=weekStart(new Date()),we=new Date(ws);we.setDate(we.getDate()+7);let acts=data.activities.filter(a=>a.date>=dateISO(ws)&&a.date<dateISO(we));document.getElementById('weekKm').textContent=acts.filter(a=>/run/i.test(a.type)).reduce((s,a)=>s+(+a.distance||0),0).toFixed(1)+' km';document.getElementById('weekSessions').textContent=acts.length;document.getElementById('checkStatus').textContent=data.checks.length? 'Logged':'Due';
 let runs=data.activities.filter(a=>/run/i.test(a.type));document.getElementById('totalKm').textContent=runs.reduce((s,a)=>s+(+a.distance||0),0).toFixed(1)+' km';document.getElementById('totalRuns').textContent=runs.length;document.getElementById('longest').textContent=runs.length?Math.max(...runs.map(a=>+a.distance||0)).toFixed(1)+' km':'—';
