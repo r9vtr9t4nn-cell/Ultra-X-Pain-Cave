@@ -14,33 +14,36 @@ button{border:0;border-radius:999px;padding:14px 24px;background:#ff2680;color:#
 </head>
 <body>
 <main class="card">
-<h1 id="heading">Checking Strava connection…</h1>
-<p id="status">Checking that Strava returned a secure connection to this browser.</p>
+<h1 id="heading">Finishing Strava connection…</h1>
+<p id="status">Securely transferring your connection to this browser.</p>
 <button id="continue" type="button">Continue to The Long Game</button>
 </main>
 <script>
-(function(){
- const params=new URLSearchParams((location.hash||"").replace(/^#/,""));
- const session=params.get("strava_session");
+(async function(){
+ const WORKER="https://the-long-game-strava.r9vtr9t4nn.workers.dev";
  const heading=document.getElementById("heading");
  const status=document.getElementById("status");
  const button=document.getElementById("continue");
- if(!session){
-  heading.textContent="No Strava session received";
-  status.textContent="The connector returned to this page, but no session token was included. Please take a screenshot of this message.";
+ const code=new URLSearchParams(location.search).get("code");
+ if(!code){
+  heading.textContent="No connection code received";
+  status.textContent="The Strava return link did not include a connection code. Please start Connect Strava again from the app.";
   return;
  }
  try{
-  localStorage.setItem("longgame-strava-session",session);
-  const saved=localStorage.getItem("longgame-strava-session");
-  if(saved!==session) throw new Error("Storage verification failed");
-  heading.textContent="Strava session received and saved";
-  status.textContent="The secure session is saved in this browser. Select Continue to return to The Long Game.";
+  const response=await fetch(WORKER+"/api/exchange",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({code})});
+  const data=await response.json();
+  if(!response.ok||!data.session) throw new Error(data.error||"The connection could not be transferred.");
+  localStorage.setItem("longgame-strava-session",data.session);
+  if(localStorage.getItem("longgame-strava-session")!==data.session) throw new Error("This browser could not save the connection.");
+  history.replaceState(null,"",location.pathname);
+  heading.textContent="Strava connected";
+  status.textContent="Your secure connection has been saved. Continue to The Long Game, then choose Sync now to import your activities.";
   button.style.display="inline-block";
   button.addEventListener("click",()=>location.replace("./"));
  }catch(error){
-  heading.textContent="Could not save Strava session";
-  status.textContent="This browser did not allow the connection to be saved. Open The Long Game in a normal Safari window and try again.";
+  heading.textContent="Strava connection not completed";
+  status.textContent=error.message+" Please check the Worker has been updated and deployed, then connect again.";
  }
 })();
 </script>
