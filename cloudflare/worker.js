@@ -99,7 +99,6 @@ async function syncActivities(env, athleteId) {
     if (!Array.isArray(list) || list.length === 0) break;
     const statements = [];
     for (const a of list) {
-      if (!["Run","TrailRun","VirtualRun","Hike"].includes(a.sport_type)) continue;
       statements.push(env.DB.prepare(`INSERT OR REPLACE INTO activities
         (activity_id, athlete_id, name, sport_type, start_date, distance, moving_time, elapsed_time, total_elevation_gain, average_speed, max_speed, average_heartrate, max_heartrate, suffer_score, imported_at)
         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)`)
