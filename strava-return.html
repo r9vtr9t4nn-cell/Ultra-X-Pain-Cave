@@ -40,7 +40,8 @@ button{border:0;border-radius:999px;padding:14px 24px;background:#ff2680;color:#
   heading.textContent="Strava connected";
   status.textContent="Your secure connection has been saved. Continue to The Long Game, then choose Sync now to import your activities.";
   button.style.display="inline-block";
-  button.addEventListener("click",()=>location.replace("./?strava_session="+encodeURIComponent(data.session)+"&handoff=1"));
+  status.textContent="Connection saved. Opening The Long Game and importing your activities…";
+  setTimeout(()=>location.replace("./?strava_session="+encodeURIComponent(data.session)+"&handoff=1"),700);
  }catch(error){
   heading.textContent="Strava connection not completed";
   status.textContent=error.message+" Please check the Worker has been updated and deployed, then connect again.";
