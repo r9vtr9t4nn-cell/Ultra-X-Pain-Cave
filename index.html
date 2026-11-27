@@ -121,9 +121,11 @@ function handleStravaReturn(){
  if(session){
   stravaSession=session;
   localStorage.setItem(STRAVA_SESSION_KEY,session);
+  const completedHandoff=queryParams.get('handoff')==='1';
   history.replaceState(null,'',location.pathname);
   renderStrava();
-  toast('Strava connected — ready to sync');
+  toast(completedHandoff?'Strava connected — importing activities':'Strava connected — ready to sync');
+  if(completedHandoff) setTimeout(()=>syncStrava(),350);
   return true;
  }
  return false;
