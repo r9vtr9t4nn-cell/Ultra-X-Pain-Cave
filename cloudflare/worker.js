@@ -60,10 +60,10 @@ async function getGarminToken(env) {
 async function syncGarmin(env) {
   const token=await getGarminToken(env);
   let start=0, total=0, pages=0;
-  while(pages<20) {
+  while(pages<200) {
     const url=new URL(GARMIN_BASE+"/activitylist-service/activities/search/activities");
     url.searchParams.set("start",String(start));
-    url.searchParams.set("limit","1000");
+    url.searchParams.set("limit","100");
     const res=await fetch(url,{headers:{Authorization:"Bearer "+token,Accept:"*/*"}});
     const raw=await res.text();
     if(!res.ok) throw new Error("Garmin activity request failed ("+res.status+"). "+raw.slice(0,180));
