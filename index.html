@@ -115,14 +115,18 @@ const STRAVA_SESSION_KEY='longgame-strava-session';
 let stravaSession=localStorage.getItem(STRAVA_SESSION_KEY)||'';
 function stravaHeaders(){return {authorization:'Bearer '+stravaSession,'content-type':'application/json'};}
 function handleStravaReturn(){
- const params=new URLSearchParams((location.hash||'').replace(/^#/,''));
- const session=params.get('strava_session');
+ const hashParams=new URLSearchParams((location.hash||'').replace(/^#/,''));
+ const queryParams=new URLSearchParams(location.search||'');
+ const session=hashParams.get('strava_session')||queryParams.get('strava_session');
  if(session){
-  stravaSession=session;localStorage.setItem(STRAVA_SESSION_KEY,session);
-  history.replaceState(null,'',location.pathname+location.search);
-  toast('Strava connected — ready to sync');
+  stravaSession=session;
+  localStorage.setItem(STRAVA_SESSION_KEY,session);
+  history.replaceState(null,'',location.pathname);
   renderStrava();
+  toast('Strava connected — ready to sync');
+  return true;
  }
+ return false;
 }
 window.addEventListener('hashchange',handleStravaReturn);
 window.addEventListener('storage',event=>{
