@@ -314,7 +314,10 @@ function structuredWeekSessions(monday){
  const detail=document.querySelectorAll('#plan details')[diff];if(!detail)return [];const body=detail.querySelector('div');if(!body)return [];
  const out=[];const lines=body.innerHTML.split('<br>');
  const add=(day,title,kind)=>{const date=new Date(monday);date.setDate(date.getDate()+({Mon:0,Tue:1,Wed:2,Thu:3,Fri:4,Sat:5,Sun:6}[day]));out.push({date:dateISO(date),title:title,kind:kind});};
- for(const raw of lines){const open=raw.indexOf('<b>'),close=raw.indexOf('</b>');if(open<0||close<0)continue;const label=raw.slice(open+3,close);const days=label.split(':')[0].split('·')[0].split('/').map(x=>x.trim()).filter(x=>['Mon','Tue','Wed','Thu','Fri','Sat','Sun'].includes(x));const description=raw.slice(close+4).trim();if(!description||description.toLowerCase().includes('rest'))continue;for(const day of days){if(day==='Sat')continue;const gym=day==='Mon'||day==='Thu';add(day,(gym?'Gym · ':'')+description,gym?'Gym':'Run');}}
+ for(const raw of lines){const open=raw.indexOf('<b>'),close=raw.indexOf('</b>');if(open<0||close<0)continue;const label=raw.slice(open+3,close);const days=label.split(':')[0].split('·')[0].split('/').map(x=>x.trim()).filter(x=>['Mon','Tue','Wed','Thu','Fri','Sat','Sun'].includes(x));const description=raw.slice(close+4).trim();if(!description||description.toLowerCase().includes('rest'))continue;
+  if(days.includes('Mon')&&days.includes('Thu')&&description.toLowerCase().includes('gym a / gym b')){const parts=description.split('/');add('Mon','Gym · '+parts[0].trim(),'Gym');add('Thu','Gym · '+parts[1].trim(),'Gym');continue;}
+  for(const day of days){if(day==='Sat')continue;const gym=day==='Mon'||day==='Thu';add(day,(gym?'Gym · ':'')+description,gym?'Gym':'Run');}
+ }
  return out;
 }
 function renderWeek(){
