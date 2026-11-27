@@ -61,6 +61,7 @@ async function verifySession(request, secret) {
 async function ensureTables(db) {
   await db.batch([
     db.prepare("CREATE TABLE IF NOT EXISTS oauth_states (state TEXT PRIMARY KEY, expires_at INTEGER NOT NULL)"),
+    db.prepare("CREATE TABLE IF NOT EXISTS oauth_handoffs (code TEXT PRIMARY KEY, session_cipher TEXT NOT NULL, expires_at INTEGER NOT NULL)"),
     db.prepare("CREATE TABLE IF NOT EXISTS oauth_tokens (athlete_id INTEGER PRIMARY KEY, token_cipher TEXT NOT NULL, expires_at INTEGER NOT NULL, updated_at TEXT DEFAULT CURRENT_TIMESTAMP)"),
     db.prepare("CREATE TABLE IF NOT EXISTS activities (activity_id INTEGER PRIMARY KEY, athlete_id INTEGER NOT NULL, name TEXT, sport_type TEXT, start_date TEXT, distance REAL, moving_time INTEGER, elapsed_time INTEGER, total_elevation_gain REAL, average_speed REAL, max_speed REAL, average_heartrate REAL, max_heartrate REAL, suffer_score INTEGER, imported_at TEXT DEFAULT CURRENT_TIMESTAMP)"),
     db.prepare("CREATE TABLE IF NOT EXISTS sync_state (athlete_id INTEGER PRIMARY KEY, last_activity_id INTEGER, last_sync_at TEXT, sync_status TEXT)")
@@ -157,7 +158,21 @@ export default {
           ON CONFLICT(athlete_id) DO UPDATE SET token_cipher=excluded.token_cipher,expires_at=excluded.expires_at,updated_at=CURRENT_TIMESTAMP`)
           .bind(athleteId,await encrypt(tokens,env.TOKEN_ENCRYPTION_KEY),tokens.expires_at).run();
         const session = await signSession(athleteId,env.TOKEN_ENCRYPTION_KEY);
-        return Response.redirect(APP_ORIGIN+"/Ultra-X-Pain-Cave/strava-return.html#strava_session="+encodeURIComponent(session),302);
+        const handoffCode = b64url(crypto.getRandomValues(new Uint8Array(24)));
+        await env.DB.prepare("INSERT INTO oauth_handoffs (code,session_cipher,expires_at) VALUES (?,?,?)")
+          .bind(handoffCode,await encrypt({session},env.TOKEN_ENCRYPTION_KEY),Math.floor(Date.now()/1000)+300).run();
+        return Response.redirect(APP_ORIGIN+"/Ultra-X-Pain-Cave/strava-return.html?code="+encodeURIComponent(handoffCode),302);
+      }
+      if (url.pathname === "/api/exchange" && request.method === "POST") {
+        if (origin && origin !== APP_ORIGIN) return json({error:"Origin not allowed"},403);
+        const body = await request.json().catch(() => ({}));
+        const code = typeof body.code === "string" ? body.code : "";
+        if (!code || code.length > 100) return json({error:"Missing or invalid hand-off code."},400);
+        const handoff = await env.DB.prepare("SELECT session_cipher FROM oauth_handoffs WHERE code = ? AND expires_at > ?").bind(code,Math.floor(Date.now()/1000)).first();
+        if (!handoff) return json({error:"Connection hand-off expired or already used. Please connect Strava again."},400);
+        await env.DB.prepare("DELETE FROM oauth_handoffs WHERE code = ?").bind(code).run();
+        const saved = await decrypt(handoff.session_cipher,env.TOKEN_ENCRYPTION_KEY);
+        return json({session:saved.session});
       }
       if (url.pathname.startsWith("/api/")) {
         if (origin && origin !== APP_ORIGIN) return json({error:"Origin not allowed"},403);
